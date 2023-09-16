@@ -10,7 +10,7 @@ function BunImageTransformPlugin(): BunPlugin {
     async setup(build) {
       const cacheDirectory = ".cache";
 
-      build.onResolve({ filter: /\.(png)\?./ }, async (args) => {
+      build.onResolve({ filter: /&bunimg$/ }, async (args) => {
         const path = resolve(dirname(args.importer), args.path);
 
         const link = new URL(`file://${path}`);
