@@ -9,11 +9,13 @@ import {
 } from "./modifier";
 import { mkdir } from "fs/promises";
 
-function BunImageTransformPlugin(): BunPlugin {
+function BunImageTransformPlugin(settings: {
+  cacheDirectory?: string;
+}): BunPlugin {
   return {
     name: "BunImageTransform",
     async setup(build) {
-      const cacheDirectory = ".cache";
+      const cacheDirectory = settings.cacheDirectory ?? ".cache";
 
       build.onResolve({ filter: /&bunimg$/ }, async (args) => {
         const path = resolve(dirname(args.importer), args.path);

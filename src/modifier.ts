@@ -1,14 +1,18 @@
-import { type Metadata, type FitEnum, type Sharp, KernelEnum } from "sharp";
-import { clampDimensionsPreservingAspectRatio } from "./utils";
+import { type Metadata, type Sharp } from "sharp";
+import {
+  clampDimensionsPreservingAspectRatio,
+  convertToBoolean,
+  convertToNumber,
+} from "./utils";
 
 export type Parameters = {
-  width?: number;
-  height?: number;
+  width?: string;
+  height?: string;
   resize?: string;
-  fit?: keyof FitEnum;
+  fit?: string;
   position?: string;
-  kernel?: keyof KernelEnum;
-  enlarge?: boolean;
+  kernel?: string;
+  enlarge?: string;
   background?: string;
   format?: string;
 };
@@ -22,8 +26,8 @@ export function widthModifier(image: Sharp, params: Parameters) {
     return image;
   }
 
-  return image.resize(params.width, undefined, {
-    withoutEnlargement: !params.enlarge,
+  return image.resize(convertToNumber(params.width), undefined, {
+    // withoutEnlargement: !convertToBoolean(params.enlarge),
   });
 }
 
@@ -32,8 +36,8 @@ export function heightModifier(image: Sharp, params: Parameters) {
     return image;
   }
 
-  return image.resize(undefined, params.height, {
-    withoutEnlargement: !params.enlarge,
+  return image.resize(undefined, convertToNumber(params.height), {
+    withoutEnlargement: !convertToBoolean(params.enlarge),
   });
 }
 
@@ -56,7 +60,7 @@ export function resizeModifier(
   }
 
   // sharp's `withoutEnlargement` doesn't respect the requested aspect ratio, so we need to do it ourselves
-  if (!params.enlarge) {
+  if (!convertToBoolean(params.enlarge)) {
     const clamped = clampDimensionsPreservingAspectRatio(meta, {
       width,
       height,
@@ -65,10 +69,10 @@ export function resizeModifier(
     height = clamped.height;
   }
   return image.resize(width, height, {
-    fit: params.fit,
+    fit: <any>params.fit,
     position: params.position,
     background: params.background,
-    kernel: params.kernel,
+    kernel: <any>params.kernel,
   });
 }
 
