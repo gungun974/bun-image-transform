@@ -123,4 +123,18 @@ describe("format", () => {
       () => import(`./bun-logo.png?format=myFutureImageFormat&bunimg`),
     ).toThrow(new ModifierError("Format myFutureImageFormat is unknown"));
   });
+
+  it("should format bun logo in jpeg with quality of 65", async () => {
+    const { default: image }: any = await import(
+      "./bun-logo.png?format=jpeg&quality=65&bunimg"
+    );
+    const targetFile = Bun.file(resolve(import.meta.dir, "./bun-logo-65.jpeg"));
+
+    const generatePath = image.replace("file:", "");
+    const newFile = Bun.file(generatePath);
+
+    expect(Bun.hash(await newFile.arrayBuffer())).toBe(
+      Bun.hash(await targetFile.arrayBuffer()),
+    );
+  });
 });

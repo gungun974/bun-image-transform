@@ -1,7 +1,9 @@
 import { Metadata } from "sharp";
 
 export function convertToNumber(text: string): number;
-export function convertToNumber(text: string | undefined): number | undefined {
+export function convertToNumber(text: undefined): undefined;
+export function convertToNumber(text: string | undefined): number | undefined;
+export function convertToNumber(text: string | undefined) {
   if (text === undefined) {
     return;
   }

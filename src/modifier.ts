@@ -15,6 +15,7 @@ export type Parameters = {
   enlarge?: string;
   background?: string;
   format?: string;
+  quality?: string;
 };
 
 export class ModifierError extends Error {}
@@ -85,32 +86,48 @@ export function formatModifier(image: Sharp, parameters: Parameters) {
 
   switch (parameters.format) {
     case "png":
-      image.png();
+      image.png({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "jpg":
     case "jpeg":
-      image.jpeg();
+      image.jpeg({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "webp":
-      image.webp();
+      image.webp({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "gif":
       image.gif();
       return image;
     case "jp2":
-      image.jp2();
+      image.jp2({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "tiff":
-      image.tiff();
+      image.tiff({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "avif":
-      image.avif();
+      image.avif({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "heif":
-      image.heif();
+      image.heif({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     case "jxl":
-      image.jxl();
+      image.jxl({
+        quality: convertToNumber(parameters.quality),
+      });
       return image;
     default:
       throw new ModifierError(`Format ${parameters.format} is unknown`);
