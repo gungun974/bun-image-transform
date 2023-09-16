@@ -17,7 +17,7 @@ export type Parameters = {
   format?: string;
 };
 
-class ModifierError extends Error {}
+export class ModifierError extends Error {}
 
 //! Resize https://sharp.pixelplumbing.com/api-resize#resize
 
@@ -111,9 +111,6 @@ export function formatModifier(image: Sharp, parameters: Parameters) {
       return image;
     case "jxl":
       image.jxl();
-      return image;
-    case "raw":
-      image.raw();
       return image;
     default:
       throw new ModifierError(`Format ${parameters.format} is unknown`);

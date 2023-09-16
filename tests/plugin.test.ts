@@ -1,9 +1,10 @@
 import { plugin, sleep } from "bun";
 import BunImageTransformPlugin from "../src";
 import { tmpdir } from "os";
-import { resolve } from "path";
+import { extname, resolve } from "path";
 import { describe, expect, it } from "bun:test";
 import sharp from "sharp";
+import { ModifierError } from "../src/modifier";
 
 function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
@@ -15,7 +16,8 @@ function generateUUID(): string {
 
 plugin(
   BunImageTransformPlugin({
-    cacheDirectory: () => resolve(tmpdir(), generateUUID()),
+    cacheDirectory: () =>
+      resolve(tmpdir(), "bun-image-transform-test", generateUUID()),
   }),
 );
 
@@ -90,5 +92,35 @@ describe("resize", () => {
 
     expect(metadata.width).toBe(32);
     expect(metadata.height).toBe(16);
+  });
+});
+
+describe("format", () => {
+  it.each([
+    ["png", ".png", "png"],
+    ["jpg", ".jpg", "jpeg"],
+    ["jpeg", ".jpeg", "jpeg"],
+    ["webp", ".webp", "webp"],
+    ["gif", ".gif", "gif"],
+    ["avif", ".avif", "heif"],
+    ["heif", ".heif", "heif"],
+  ])(
+    "should convert the file to %s",
+    async (format, extension, specialFormat) => {
+      const { default: image }: any = await import(
+        `./bun-logo.png?format=${format}&bunimg`
+      );
+
+      const metadata = await sharp(image.replace("file:", "")).metadata();
+
+      expect(metadata.format).toBe(specialFormat);
+      expect(extname(image)).toBe(extension);
+    },
+  );
+
+  it("should throw error when format type is unknown", async () => {
+    expect(
+      () => import(`./bun-logo.png?format=myFutureImageFormat&bunimg`),
+    ).toThrow(new ModifierError("Format myFutureImageFormat is unknown"));
   });
 });
