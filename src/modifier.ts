@@ -24,7 +24,6 @@ export type Parameters = {
   position?: string;
   kernel?: string;
   enlarge?: string;
-  background?: string;
   format?: string;
   quality?: string;
   trim?: string;
@@ -66,7 +65,8 @@ export function resizeModifier(
     return image;
   }
 
-  let [width, height] = params.resize.split("x").map(Number);
+  let [size, background] = params.resize.split("_");
+  let [width, height] = size.split("x").map(Number);
   if (!width) {
     return image;
   }
@@ -87,7 +87,7 @@ export function resizeModifier(
   return image.resize(width, height, {
     fit: <any>params.fit,
     position: params.position,
-    background: params.background,
+    background,
     kernel: <any>params.kernel,
   });
 }
@@ -116,6 +116,7 @@ export function extendModifier(image: Sharp, params: Parameters) {
     right,
     bottom,
     left,
+    background: params.extend.at(4),
   });
 }
 
@@ -245,7 +246,7 @@ export function tintModifier(image: Sharp, params: Parameters) {
     return image;
   }
 
-  return image.threshold(params.tint);
+  return image.tint(params.tint);
 }
 
 //! Grayscale https://sharp.pixelplumbing.com/api-operation#grayscale
