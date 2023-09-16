@@ -1,4 +1,4 @@
-import { plugin } from "bun";
+import { plugin, sleep } from "bun";
 import BunImageTransformPlugin from "../src";
 import { tmpdir } from "os";
 import { resolve } from "path";
@@ -15,7 +15,7 @@ function generateUUID(): string {
 
 plugin(
   BunImageTransformPlugin({
-    cacheDirectory: resolve(tmpdir(), generateUUID()),
+    cacheDirectory: () => resolve(tmpdir(), generateUUID()),
   }),
 );
 
@@ -38,6 +38,25 @@ describe("import", () => {
     expect(image.replace("file:", "")).toBe(
       resolve(import.meta.dir, "./bun-logo.png"),
     );
+  });
+
+  it("should don't touch generated image when already generate", async () => {
+    const { default: image }: any = await import("./bun-logo.png?&bunimg");
+    const firstGeneratePath = image.replace("file:", "");
+
+    const { lastModified: firstLastModified, size: firstSize } =
+      Bun.file(firstGeneratePath);
+
+    await sleep(1);
+
+    const { default: imageB }: any = await import("./bun-logo.png?&bunimg");
+    const secondGeneratePath = imageB.replace("file:", "");
+    const { lastModified: secondLastModified, size: secondSize } =
+      Bun.file(secondGeneratePath);
+
+    expect(secondGeneratePath).toBe(firstGeneratePath);
+    expect(secondLastModified).toBe(firstLastModified);
+    expect(secondSize).toBe(firstSize);
   });
 });
 

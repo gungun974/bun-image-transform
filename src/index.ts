@@ -7,15 +7,23 @@ import {
   resizeModifier,
   widthModifier,
 } from "./modifier";
-import { mkdir } from "fs/promises";
+import { access, mkdir } from "fs/promises";
 
 function BunImageTransformPlugin(settings: {
-  cacheDirectory?: string;
+  cacheDirectory?: string | (() => string);
 }): BunPlugin {
   return {
     name: "BunImageTransform",
     async setup(build) {
-      const cacheDirectory = settings.cacheDirectory ?? ".cache";
+      let cacheDirectory = ".cache";
+
+      if (settings.cacheDirectory) {
+        if (typeof settings.cacheDirectory === "string") {
+          cacheDirectory = settings.cacheDirectory;
+        } else {
+          cacheDirectory = settings.cacheDirectory();
+        }
+      }
 
       build.onResolve({ filter: /&bunimg$/ }, async (args) => {
         const path = resolve(dirname(args.importer), args.path);
@@ -37,24 +45,32 @@ function BunImageTransformPlugin(settings: {
           `${Bun.hash(path)}.${extension}`,
         );
 
-        let image = sharp(sourceFile);
+        try {
+          await access(generatedImage);
 
-        const meta = await image.metadata();
+          return {
+            path: generatedImage,
+          };
+        } catch {
+          let image = sharp(sourceFile);
 
-        image = widthModifier(image, parameters);
-        image = heightModifier(image, parameters);
-        image = resizeModifier(image, meta, parameters);
-        image = formatModifier(image, parameters);
+          const meta = await image.metadata();
 
-        await mkdir(dirname(generatedImage), {
-          recursive: true,
-        });
+          image = widthModifier(image, parameters);
+          image = heightModifier(image, parameters);
+          image = resizeModifier(image, meta, parameters);
+          image = formatModifier(image, parameters);
 
-        await image.toFile(generatedImage);
+          await mkdir(dirname(generatedImage), {
+            recursive: true,
+          });
 
-        return {
-          path: generatedImage,
-        };
+          await image.toFile(generatedImage);
+
+          return {
+            path: generatedImage,
+          };
+        }
       });
     },
   };
