@@ -17,8 +17,9 @@ function BunImageTransformPlugin(): BunPlugin {
 
         const parameters = Object.fromEntries(link.searchParams);
 
-        let extension = extname(path);
+        const sourceFile = link.pathname;
 
+        let extension = extname(sourceFile).slice(1);
         if (parameters.format) {
           extension = parameters.format;
         }
@@ -28,7 +29,6 @@ function BunImageTransformPlugin(): BunPlugin {
           `${Bun.hash(path)}.${extension}`,
         );
 
-        const sourceFile = link.pathname;
 
         let image = sharp(sourceFile);
 
