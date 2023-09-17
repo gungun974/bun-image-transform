@@ -16,9 +16,6 @@ Bun Image Transform allows you to do exactly this.
 
 ## How to installed it
 
-You will first need a minimum version of v1.0.3 of Bun.
-**_This version is not yet available, and without the changes from pull request oven-sh/bun#5477, the plugin will not be able to transform images with the Bun Runtime._**
-
 For now, Bun Image Transform is not yet available on NPM, but later on, you'll simply need to run a bun install of the package.
 
 ## Usages
