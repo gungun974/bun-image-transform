@@ -39,9 +39,7 @@ function BunImageTransformPlugin(settings: {
         }
       }
 
-      build.onLoad({ filter: /&bunimg$/ }, async (args) => {
-        const path = args.path;
-
+      async function generateImage(path: string) {
         const link = new URL(`file://${path}`);
 
         const parameters = Object.fromEntries(link.searchParams);
@@ -62,12 +60,7 @@ function BunImageTransformPlugin(settings: {
         try {
           await access(generatedImage);
 
-          return {
-            contents: `
-              export {default} from ${JSON.stringify(generatedImage)}
-            `,
-            loader: "js",
-          };
+          return generatedImage;
         } catch {
           let image = sharp(sourceFile);
 
@@ -98,14 +91,32 @@ function BunImageTransformPlugin(settings: {
 
           await image.toFile(generatedImage);
 
+          return generatedImage;
+        }
+      }
+
+      if (build.config) {
+        build.onResolve({ filter: /&bunimg$/ }, async (args) => {
+          const path = resolve(dirname(args.importer), args.path);
+
+          const generatedImage = await generateImage(path);
+
+          return {
+            path: generatedImage,
+          };
+        });
+      } else {
+        build.onLoad({ filter: /&bunimg$/ }, async (args) => {
+          const generatedImage = await generateImage(args.path);
+
           return {
             contents: `
               export {default} from ${JSON.stringify(generatedImage)}
             `,
             loader: "js",
           };
-        }
-      });
+        });
+      }
     },
   };
 }
