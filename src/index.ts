@@ -39,8 +39,8 @@ function BunImageTransformPlugin(settings: {
         }
       }
 
-      build.onResolve({ filter: /&bunimg$/ }, async (args) => {
-        const path = resolve(dirname(args.importer), args.path);
+      build.onLoad({ filter: /&bunimg$/ }, async (args) => {
+        const path = args.path;
 
         const link = new URL(`file://${path}`);
 
@@ -63,7 +63,10 @@ function BunImageTransformPlugin(settings: {
           await access(generatedImage);
 
           return {
-            path: generatedImage,
+            contents: `
+              export {default} from ${JSON.stringify(generatedImage)}
+            `,
+            loader: "js",
           };
         } catch {
           let image = sharp(sourceFile);
@@ -96,7 +99,10 @@ function BunImageTransformPlugin(settings: {
           await image.toFile(generatedImage);
 
           return {
-            path: generatedImage,
+            contents: `
+              export {default} from ${JSON.stringify(generatedImage)}
+            `,
+            loader: "js",
           };
         }
       });
