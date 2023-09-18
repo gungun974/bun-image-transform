@@ -16,7 +16,7 @@ function generateUUID(): string {
 
 plugin(
   BunImageTransformPlugin({
-    cacheDirectory: () =>
+    outputDirectory: () =>
       resolve(tmpdir(), "bun-image-transform-test", generateUUID()),
   }),
 );

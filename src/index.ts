@@ -1,5 +1,5 @@
-import { resolve, dirname, extname } from "path";
-import { type BunPlugin } from "bun";
+import { resolve, dirname, extname, relative, join } from "path";
+import { type BunPlugin, type OnLoadCallback } from "bun";
 import sharp from "sharp";
 import {
   blurModifier,
@@ -24,19 +24,40 @@ import {
 } from "./modifier";
 import { access, mkdir } from "fs/promises";
 
-export function BunImageTransformPlugin(settings?: {
-  cacheDirectory?: string | (() => string);
-}): BunPlugin {
+/**
+ * Bun Image Transform Settings
+ */
+type Settings = {
+  /**
+   * Default directory when file are output
+   */
+  outputDirectory?: string | (() => string);
+  /**
+   * Change the return path of generate image to be a relative path from output directory
+   * When enabled this, the plugin stop copy the assets to the build folder
+   * You need to copy manually assets or make outputDirectory the build folder
+   */
+  useRelativePath?: boolean;
+  /**
+   * Add a prefix on every path generate by relative path, useful for public folder
+   */
+  prefixRelativePath?: string;
+};
+
+/**
+ * Bun Image Transform Plugin
+ */
+export function BunImageTransformPlugin(settings?: Settings): BunPlugin {
   return {
     name: "BunImageTransform",
     async setup(build) {
-      let cacheDirectory = ".cache";
+      let outputDirectory = ".cache";
 
-      if (settings && settings.cacheDirectory) {
-        if (typeof settings.cacheDirectory === "string") {
-          cacheDirectory = settings.cacheDirectory;
+      if (settings && settings.outputDirectory) {
+        if (typeof settings.outputDirectory === "string") {
+          outputDirectory = settings.outputDirectory;
         } else {
-          cacheDirectory = settings.cacheDirectory();
+          outputDirectory = settings.outputDirectory();
         }
       }
 
@@ -56,7 +77,7 @@ export function BunImageTransformPlugin(settings?: {
         }
 
         const generatedImage = resolve(
-          cacheDirectory,
+          outputDirectory,
           `${Bun.hash(path)}.${extension}`,
         );
 
@@ -99,6 +120,33 @@ export function BunImageTransformPlugin(settings?: {
         }
       }
 
+      const onLoadCallback: OnLoadCallback = (args) => {
+        const generatedImage = args.path;
+
+        let pathToImage = generatedImage;
+
+        if (settings && settings.useRelativePath) {
+          pathToImage = join(
+            settings.prefixRelativePath ? settings.prefixRelativePath : "./",
+            relative(outputDirectory, generatedImage),
+          );
+
+          return {
+            contents: `
+              export default ${JSON.stringify(pathToImage)}
+            `,
+            loader: "js",
+          };
+        }
+
+        return {
+          contents: `
+              export {default} from ${JSON.stringify(pathToImage)}
+            `,
+          loader: "js",
+        };
+      };
+
       if (build.config) {
         build.onResolve({ filter: /&bunimg$/ }, async (args) => {
           const path = Bun.resolveSync(args.path, process.cwd());
@@ -107,18 +155,22 @@ export function BunImageTransformPlugin(settings?: {
 
           return {
             path: generatedImage,
+            namespace: "bun-image-transformed",
           };
         });
+
+        build.onLoad(
+          { filter: /./, namespace: "bun-image-transformed" },
+          onLoadCallback,
+        );
       } else {
         build.onLoad({ filter: /&bunimg$/ }, async (args) => {
           const generatedImage = await generateImage(args.path);
 
-          return {
-            contents: `
-              export {default} from ${JSON.stringify(generatedImage)}
-            `,
-            loader: "js",
-          };
+          return onLoadCallback({
+            ...args,
+            path: generatedImage,
+          });
         });
       }
     },

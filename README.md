@@ -167,6 +167,29 @@ Bun Image Transform works by using the Node image processing library, sharp. The
 | lightness  | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?lightness=50&bunimg`                                 |
 | saturation | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?saturation=0,5&bunimg`                               |
 
+### Settings
+
+By default, image files will be generated in the .cache folder.
+You can modify this behavior with the parameter below.
+
+```ts
+BunImageTransformPlugin({
+  outputDirectory: "customOutputFolder",
+});
+```
+
+There are two more advanced options that allow you to disable the default behavior of the file loader and return a relative path to the output folder.
+
+This behavior is perfectly suitable if you have a public folder on a web server where you want to directly place the generated images and work with the relative paths of that public folder.
+
+```ts
+BunImageTransformPlugin({
+  outputDirectory: "./build/public/img/",
+  useRelativePath: true,
+  prefixRelativePath: "img/",
+});
+```
+
 ## Credits
 
 This project would not be possible without [Bun](https://github.com/oven-sh/bun) inspiring me to create this plugin.
