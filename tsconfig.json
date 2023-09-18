@@ -20,6 +20,6 @@
       "bun-types" // add Bun global
     ]
   },
-  "include": ["src/**/*.ts", "customTypes.d.ts"],
+  "include": ["src/**/*.ts", "customTypes.d.ts", "tests/**/*.ts"],
   "exclude": ["node_modules"]
 }

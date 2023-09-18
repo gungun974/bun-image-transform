@@ -1,91 +1,541 @@
-import { type Metadata, type Sharp } from "sharp";
+import sharp, { type Metadata, type Sharp } from "sharp";
 import {
   clampDimensionsPreservingAspectRatio,
   convertToBoolean,
   convertToNumber,
 } from "./utils";
 
-export type Parameters = {
-  grayscale?: string;
-  tint?: string;
-  threshold?: string;
-  normalize?: string;
-  negate?: string;
-  gamma?: string;
-  blur?: string;
-  median?: string;
-  sharpen?: string;
-  flop?: string;
-  flip?: string;
-  width?: string;
-  height?: string;
-  resize?: string;
-  fit?: string;
-  position?: string;
-  kernel?: string;
-  enlarge?: string;
-  format?: string;
-  quality?: string;
-  trim?: string;
-  extend?: string;
-  extract?: string;
-  rotate?: string;
-  brightness?: string;
-  saturation?: string;
-  hue?: string;
-  lightness?: string;
-};
+export type ModifierParameters =
+  | WidthModifierParameters
+  | HeightModifierParameters
+  | ResizeModifierParameters
+  | TrimModifierParameters
+  | ExtendModifierParameters
+  | ExtractModifierParameters
+  | RotateModifierParameters
+  | FlipModifierParameters
+  | FlopModifierParameters
+  | SharpenModifierParameters
+  | MedianModifierParameters
+  | BlurModifierParameters
+  | GammaModifierParameters
+  | NegateModifierParameters
+  | NormalizeModifierParameters
+  | ThresholdModifierParameters
+  | TintModifierParameters
+  | GrayscaleModifierParameters
+  | ModulateModifierParameters
+  | FormatModifierParameters
+  | RenderModifierParameters;
 
 export class ModifierError extends Error {}
 
+//! Controls
+
+export function getModifierFormatOutput(
+  rawParameters: string,
+): string | undefined {
+  const rawModifiers = rawParameters.replace(/,/g, ".").split("&");
+
+  for (let index = rawModifiers.length - 1; index >= 0; index--) {
+    const rawModifier = rawModifiers[index];
+
+    if (!rawModifier) {
+      continue;
+    }
+
+    const [modifierType, data] = rawModifier.split("=");
+
+    if (modifierType === "format") {
+      if (!data) {
+        continue;
+      }
+
+      return data;
+    }
+  }
+
+  return;
+}
+
+export function modifiersPlanner(rawParameters: string): ModifierParameters[] {
+  const rawModifiers = rawParameters.replace(/,/g, ".").split("&");
+
+  const modifiers: ModifierParameters[] = [];
+
+  let enlargeFlag: boolean = false;
+  let kernelFlag: string | undefined;
+  let fitFlag: string | undefined;
+  let positionFlag: string | undefined;
+
+  let brightnessFlag: number | undefined;
+  let hueFlag: number | undefined;
+  let lightnessFlag: number | undefined;
+  let saturationFlag: number | undefined;
+
+  let qualityFlag: number | undefined;
+
+  const clearFlags = () => {
+    enlargeFlag = false;
+    kernelFlag = undefined;
+    fitFlag = undefined;
+    positionFlag = undefined;
+
+    brightnessFlag = undefined;
+    hueFlag = undefined;
+    lightnessFlag = undefined;
+    saturationFlag = undefined;
+
+    qualityFlag = undefined;
+  };
+
+  for (let index = 0; index < rawModifiers.length; index++) {
+    const rawModifier = rawModifiers[index];
+
+    if (!rawModifier) {
+      continue;
+    }
+
+    const [modifierType, data] = rawModifier.split("=");
+
+    switch (modifierType) {
+      case "enlarge": {
+        enlargeFlag = convertToBoolean(data);
+        break;
+      }
+      case "kernel": {
+        kernelFlag = data;
+        break;
+      }
+      case "fit": {
+        fitFlag = data;
+        break;
+      }
+      case "position": {
+        positionFlag = data;
+        break;
+      }
+      case "brightness": {
+        brightnessFlag = convertToNumber(data);
+        break;
+      }
+      case "hue": {
+        hueFlag = convertToNumber(data);
+        break;
+      }
+      case "lightness": {
+        lightnessFlag = convertToNumber(data);
+        break;
+      }
+      case "saturation": {
+        saturationFlag = convertToNumber(data);
+        break;
+      }
+      case "quality": {
+        qualityFlag = convertToNumber(data);
+        break;
+      }
+      case "width": {
+        const width = convertToNumber(data);
+
+        modifiers.push({
+          type: "width",
+          width,
+          enlarge: enlargeFlag,
+        });
+        clearFlags();
+        break;
+      }
+      case "height": {
+        const height = convertToNumber(data);
+
+        modifiers.push({
+          type: "height",
+          height,
+          enlarge: enlargeFlag,
+        });
+        clearFlags();
+        break;
+      }
+      case "resize": {
+        if (!data) {
+          break;
+        }
+
+        let [size, background] = data.split("_");
+
+        if (!size) {
+          throw new ModifierError("Size in resize Modifier is missing");
+        }
+
+        let [width, height] = size.split("x").map(Number);
+
+        if (!width) {
+          throw new ModifierError("Size in resize Modifier is missing");
+        }
+
+        if (!height) {
+          height = width;
+        }
+
+        modifiers.push({
+          type: "resize",
+          width,
+          height,
+          enlarge: enlargeFlag,
+          kernel: kernelFlag,
+          fit: fitFlag,
+          position: positionFlag,
+          background,
+        });
+        clearFlags();
+        break;
+      }
+      case "trim": {
+        modifiers.push({
+          type: "trim",
+        });
+        clearFlags();
+        break;
+      }
+      case "extend": {
+        if (!data) {
+          break;
+        }
+
+        let [top, right, bottom, left, background] = data.split("_");
+
+        modifiers.push({
+          type: "extend",
+          top: convertToNumber(top),
+          right: convertToNumber(right),
+          bottom: convertToNumber(bottom),
+          left: convertToNumber(left),
+          background,
+        });
+        clearFlags();
+        break;
+      }
+      case "extract": {
+        if (!data) {
+          break;
+        }
+
+        let [left, top, width, height] = data.split("_").map(Number);
+
+        if (!left) {
+          throw new ModifierError("Left in extract Modifier is missing");
+        }
+        if (!top) {
+          throw new ModifierError("Top in extract Modifier is missing");
+        }
+        if (!width) {
+          throw new ModifierError("Width in extract Modifier is missing");
+        }
+        if (!height) {
+          throw new ModifierError("Height in extract Modifier is missing");
+        }
+
+        modifiers.push({
+          type: "extract",
+          left,
+          top,
+          width,
+          height,
+        });
+        clearFlags();
+        break;
+      }
+      case "rotate": {
+        modifiers.push({
+          type: "rotate",
+          rotate: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "flip": {
+        modifiers.push({
+          type: "flip",
+        });
+        clearFlags();
+        break;
+      }
+      case "flop": {
+        modifiers.push({
+          type: "flop",
+        });
+        clearFlags();
+        break;
+      }
+      case "sharpen": {
+        modifiers.push({
+          type: "sharpen",
+          sigma: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "median": {
+        modifiers.push({
+          type: "median",
+          median: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "blur": {
+        modifiers.push({
+          type: "blur",
+          blur: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "gamma": {
+        modifiers.push({
+          type: "gamma",
+          gamma: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "negate": {
+        modifiers.push({
+          type: "negate",
+        });
+        clearFlags();
+        break;
+      }
+      case "normalize": {
+        modifiers.push({
+          type: "normalize",
+        });
+        clearFlags();
+        break;
+      }
+      case "threshold": {
+        modifiers.push({
+          type: "threshold",
+          threshold: convertToNumber(data),
+        });
+        clearFlags();
+        break;
+      }
+      case "tint": {
+        if (!data) {
+          break;
+        }
+
+        modifiers.push({
+          type: "tint",
+          color: data,
+        });
+        clearFlags();
+        break;
+      }
+      case "grayscale": {
+        modifiers.push({
+          type: "grayscale",
+        });
+        clearFlags();
+        break;
+      }
+      case "greyscale": {
+        modifiers.push({
+          type: "grayscale",
+        });
+        clearFlags();
+        break;
+      }
+      case "modulate": {
+        modifiers.push({
+          type: "modulate",
+          brightness: brightnessFlag,
+          hue: hueFlag,
+          lightness: lightnessFlag,
+          saturation: saturationFlag,
+        });
+        clearFlags();
+        break;
+      }
+      case "format": {
+        if (!data) {
+          break;
+        }
+
+        modifiers.push({
+          type: "format",
+          format: data,
+          quality: qualityFlag,
+        });
+        clearFlags();
+        break;
+      }
+      case "render": {
+        modifiers.push({
+          type: "render",
+        });
+        clearFlags();
+        break;
+      }
+    }
+  }
+
+  return modifiers;
+}
+
+export async function modifiersExecutor(
+  sourceImage: Sharp,
+  modifiers: ModifierParameters[],
+) {
+  let image = sourceImage;
+
+  for (let index = 0; index < modifiers.length; index++) {
+    const modifier = modifiers[index];
+
+    if (!modifier) {
+      continue;
+    }
+
+    switch (modifier.type) {
+      case "width": {
+        image = widthModifier(image, modifier);
+        break;
+      }
+      case "height": {
+        image = heightModifier(image, modifier);
+        break;
+      }
+      case "resize": {
+        image = resizeModifier(image, await image.metadata(), modifier);
+        break;
+      }
+      case "trim": {
+        image = trimModifier(image);
+        break;
+      }
+      case "extend": {
+        image = extendModifier(image, modifier);
+        break;
+      }
+      case "extract": {
+        image = extractModifier(image, modifier);
+        break;
+      }
+      case "rotate": {
+        image = rotateModifier(image, modifier);
+        break;
+      }
+      case "flip": {
+        image = flopModifier(image);
+        break;
+      }
+      case "flop": {
+        image = flopModifier(image);
+        break;
+      }
+      case "sharpen": {
+        image = sharpenModifier(image, modifier);
+        break;
+      }
+      case "median": {
+        image = medianModifier(image, modifier);
+        break;
+      }
+      case "blur": {
+        image = blurModifier(image, modifier);
+        break;
+      }
+      case "gamma": {
+        image = gammaModifier(image, modifier);
+        break;
+      }
+      case "negate": {
+        image = negateModifier(image);
+        break;
+      }
+      case "normalize": {
+        image = normalizeModifier(image);
+        break;
+      }
+      case "threshold": {
+        image = thresholdModifier(image, modifier);
+        break;
+      }
+      case "tint": {
+        image = tintModifier(image, modifier);
+        break;
+      }
+      case "grayscale": {
+        image = grayscaleModifier(image);
+        break;
+      }
+      case "modulate": {
+        image = modulateModifier(image, modifier);
+        break;
+      }
+      case "format": {
+        image = formatModifier(image, modifier);
+        break;
+      }
+      case "render": {
+        image = await renderModifier(image);
+        break;
+      }
+    }
+  }
+
+  return image;
+}
+
 //! Resize https://sharp.pixelplumbing.com/api-resize#resize
 
-export function widthModifier(image: Sharp, params: Parameters) {
-  if (!params.width || params.resize) {
-    return image;
-  }
+export type WidthModifierParameters = {
+  type: "width";
+  width: number;
+  enlarge: boolean;
+};
 
-  return image.resize(convertToNumber(params.width), undefined, {
-    // withoutEnlargement: !convertToBoolean(params.enlarge),
+function widthModifier(image: Sharp, params: WidthModifierParameters) {
+  return image.resize(params.width, undefined, {
+    withoutEnlargement: !params.enlarge,
   });
 }
 
-export function heightModifier(image: Sharp, params: Parameters) {
-  if (!params.height || params.resize) {
-    return image;
-  }
+export type HeightModifierParameters = {
+  type: "height";
+  height: number;
+  enlarge: boolean;
+};
 
-  return image.resize(undefined, convertToNumber(params.height), {
-    withoutEnlargement: !convertToBoolean(params.enlarge),
+function heightModifier(image: Sharp, params: HeightModifierParameters) {
+  return image.resize(undefined, params.height, {
+    withoutEnlargement: !params.enlarge,
   });
 }
 
-export function resizeModifier(
+export type ResizeModifierParameters = {
+  type: "resize";
+  width: number;
+  height: number;
+  enlarge: boolean;
+  fit?: string;
+  position?: string;
+  kernel?: string;
+  background?: string;
+};
+
+function resizeModifier(
   image: Sharp,
   meta: Metadata,
-  params: Parameters,
+  params: ResizeModifierParameters,
 ) {
-  if (!params.resize) {
-    return image;
-  }
-
-  let [size, background] = params.resize.split("_");
-
-  if (!size) {
-    throw new ModifierError("Size in resize Modifier is missing");
-  }
-
-  let [width, height] = size.split("x").map(Number);
-  if (!width) {
-    return image;
-  }
-
-  if (!height) {
-    height = width;
-  }
+  let width = params.width;
+  let height = params.height;
 
   // sharp's `withoutEnlargement` doesn't respect the requested aspect ratio, so we need to do it ourselves
-  if (!convertToBoolean(params.enlarge)) {
+  if (!params.enlarge) {
     const clamped = clampDimensionsPreservingAspectRatio(meta, {
       width,
       height,
@@ -96,222 +546,220 @@ export function resizeModifier(
   return image.resize(width, height, {
     fit: <any>params.fit,
     position: params.position,
-    background,
+    background: params.background,
     kernel: <any>params.kernel,
   });
 }
 
 //! Trim https://sharp.pixelplumbing.com/api-resize#trim
 
-export function trimModifier(image: Sharp, params: Parameters) {
-  if (!params.trim) {
-    return image;
-  }
+export type TrimModifierParameters = {
+  type: "trim";
+};
 
+function trimModifier(image: Sharp) {
   return image.trim();
 }
 
 //! Extend https://sharp.pixelplumbing.com/api-resize#extend
 
-export function extendModifier(image: Sharp, params: Parameters) {
-  if (!params.extend) {
-    return image;
-  }
+export type ExtendModifierParameters = {
+  type: "extend";
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  background?: string;
+};
 
-  let [top, right, bottom, left] = params.extend.split("_").map(Number);
-
+function extendModifier(image: Sharp, params: ExtendModifierParameters) {
   return image.extend({
-    top,
-    right,
-    bottom,
-    left,
-    background: params.extend.at(4),
+    top: params.top,
+    right: params.right,
+    bottom: params.bottom,
+    left: params.left,
+    background: params.background,
   });
 }
 
 //! Extract https://sharp.pixelplumbing.com/api-resize#extract
 
-export function extractModifier(image: Sharp, params: Parameters) {
-  if (!params.extract) {
-    return image;
-  }
+type ExtractModifierParameters = {
+  type: "extract";
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
 
-  let [left, top, width, height] = params.extract.split("_").map(Number);
-
-  if (!left) {
-    throw new ModifierError("Left in extract Modifier is missing");
-  }
-  if (!top) {
-    throw new ModifierError("Top in extract Modifier is missing");
-  }
-  if (!width) {
-    throw new ModifierError("Width in extract Modifier is missing");
-  }
-  if (!height) {
-    throw new ModifierError("Height in extract Modifier is missing");
-  }
-
+function extractModifier(image: Sharp, params: ExtractModifierParameters) {
   return image.extract({
-    left,
-    top,
-    width,
-    height,
+    left: params.left,
+    top: params.top,
+    width: params.width,
+    height: params.height,
   });
 }
 
 //! Rotate https://sharp.pixelplumbing.com/api-operation#rotate
 
-export function rotateModifier(image: Sharp, params: Parameters) {
-  if (!params.rotate) {
-    return image;
-  }
+export type RotateModifierParameters = {
+  type: "rotate";
+  rotate: number;
+};
 
-  return image.rotate(convertToNumber(params.rotate));
+function rotateModifier(image: Sharp, params: RotateModifierParameters) {
+  return image.rotate(params.rotate);
 }
 
 //! Flip https://sharp.pixelplumbing.com/api-operation#flip
 
-export function flipModifier(image: Sharp, params: Parameters) {
-  if (!params.flip) {
-    return image;
-  }
+export type FlipModifierParameters = {
+  type: "flip";
+};
 
+function flipModifier(image: Sharp) {
   return image.flip();
 }
 
 //! Flop https://sharp.pixelplumbing.com/api-operation#flop
 
-export function flopModifier(image: Sharp, params: Parameters) {
-  if (!params.flop) {
-    return image;
-  }
+export type FlopModifierParameters = {
+  type: "flop";
+};
 
+function flopModifier(image: Sharp) {
   return image.flop();
 }
 
 //! Sharpen https://sharp.pixelplumbing.com/api-operation#sharpen
 
-export function sharpenModifier(image: Sharp, params: Parameters) {
-  if (!params.sharpen) {
-    return image;
-  }
+export type SharpenModifierParameters = {
+  type: "sharpen";
+  sigma: number;
+};
 
+function sharpenModifier(image: Sharp, params: SharpenModifierParameters) {
   return image.sharpen({
-    sigma: convertToNumber(params.sharpen),
+    sigma: params.sigma,
   });
 }
 
 //! Median https://sharp.pixelplumbing.com/api-operation#median
 
-export function medianModifier(image: Sharp, params: Parameters) {
-  if (!params.median) {
-    return image;
-  }
+export type MedianModifierParameters = {
+  type: "median";
+  median: number;
+};
 
-  return image.median(convertToNumber(params.median));
+function medianModifier(image: Sharp, params: MedianModifierParameters) {
+  return image.median(params.median);
 }
 
 //! Blur https://sharp.pixelplumbing.com/api-operation#blur
 
-export function blurModifier(image: Sharp, params: Parameters) {
-  if (!params.blur) {
-    return image;
-  }
+export type BlurModifierParameters = {
+  type: "blur";
+  blur: number;
+};
 
-  return image.blur(convertToNumber(params.blur));
+function blurModifier(image: Sharp, params: BlurModifierParameters) {
+  return image.blur(params.blur);
 }
 
 //! Gamma https://sharp.pixelplumbing.com/api-operation#gamma
 
-export function gammaModifier(image: Sharp, params: Parameters) {
-  if (!params.gamma) {
-    return image;
-  }
+export type GammaModifierParameters = {
+  type: "gamma";
+  gamma: number;
+};
 
-  return image.gamma(convertToNumber(params.gamma));
+function gammaModifier(image: Sharp, params: GammaModifierParameters) {
+  return image.gamma(params.gamma);
 }
 
 //! Negate https://sharp.pixelplumbing.com/api-operation#negate
 
-export function negateModifier(image: Sharp, params: Parameters) {
-  if (!params.negate) {
-    return image;
-  }
+export type NegateModifierParameters = {
+  type: "negate";
+};
 
+function negateModifier(image: Sharp) {
   return image.negate();
 }
 
 //! Normalize https://sharp.pixelplumbing.com/api-operation#normalize
 
-export function normalizeModifier(image: Sharp, params: Parameters) {
-  if (!params.normalize) {
-    return image;
-  }
+export type NormalizeModifierParameters = {
+  type: "normalize";
+};
 
+function normalizeModifier(image: Sharp) {
   return image.normalize();
 }
 
 //! Threshold https://sharp.pixelplumbing.com/api-operation#threshold
 
-export function thresholdModifier(image: Sharp, params: Parameters) {
-  if (!params.threshold) {
-    return image;
-  }
+export type ThresholdModifierParameters = {
+  type: "threshold";
+  threshold: number;
+};
 
-  return image.threshold(convertToNumber(params.threshold));
+function thresholdModifier(image: Sharp, params: ThresholdModifierParameters) {
+  return image.threshold(params.threshold);
 }
 
 //! Tint https://sharp.pixelplumbing.com/api-operation#tint
 
-export function tintModifier(image: Sharp, params: Parameters) {
-  if (!params.tint) {
-    return image;
-  }
+export type TintModifierParameters = {
+  type: "tint";
+  color: string;
+};
 
-  return image.tint(params.tint);
+function tintModifier(image: Sharp, params: TintModifierParameters) {
+  return image.tint(params.color);
 }
 
 //! Grayscale https://sharp.pixelplumbing.com/api-operation#grayscale
 
-export function grayscaleModifier(image: Sharp, params: Parameters) {
-  if (!params.grayscale) {
-    return image;
-  }
+export type GrayscaleModifierParameters = {
+  type: "grayscale";
+};
 
+function grayscaleModifier(image: Sharp) {
   return image.grayscale();
 }
 
 //! Modulate https://sharp.pixelplumbing.com/api-operation#grayscale
 
-export function modulateModifier(image: Sharp, params: Parameters) {
-  if (
-    !params.brightness &&
-    !params.saturation &&
-    !params.hue &&
-    !params.lightness
-  ) {
-    return image;
-  }
+export type ModulateModifierParameters = {
+  type: "modulate";
+  brightness?: number;
+  saturation?: number;
+  hue?: number;
+  lightness?: number;
+};
 
+function modulateModifier(image: Sharp, params: ModulateModifierParameters) {
   return image.modulate({
     ...(params.brightness
       ? {
-          brightness: convertToNumber(params.brightness),
+          brightness: params.brightness,
         }
       : {}),
     ...(params.saturation
       ? {
-          saturation: convertToNumber(params.saturation),
+          saturation: params.saturation,
         }
       : {}),
     ...(params.hue
       ? {
-          hue: convertToNumber(params.hue),
+          hue: params.hue,
         }
       : {}),
     ...(params.lightness
       ? {
-          lightness: convertToNumber(params.lightness),
+          lightness: params.lightness,
         }
       : {}),
   });
@@ -319,26 +767,28 @@ export function modulateModifier(image: Sharp, params: Parameters) {
 
 //! Format https://sharp.pixelplumbing.com/api-output#toformat
 
-export function formatModifier(image: Sharp, parameters: Parameters) {
-  if (!parameters.format) {
-    return image;
-  }
+type FormatModifierParameters = {
+  type: "format";
+  format: string;
+  quality?: number;
+};
 
+function formatModifier(image: Sharp, parameters: FormatModifierParameters) {
   switch (parameters.format) {
     case "png":
       image.png({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "jpg":
     case "jpeg":
       image.jpeg({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "webp":
       image.webp({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "gif":
@@ -346,30 +796,38 @@ export function formatModifier(image: Sharp, parameters: Parameters) {
       return image;
     case "jp2":
       image.jp2({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "tiff":
       image.tiff({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "avif":
       image.avif({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "heif":
       image.heif({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     case "jxl":
       image.jxl({
-        quality: convertToNumber(parameters.quality),
+        quality: parameters.quality,
       });
       return image;
     default:
       throw new ModifierError(`Format ${parameters.format} is unknown`);
   }
+}
+
+export type RenderModifierParameters = {
+  type: "render";
+};
+
+async function renderModifier(image: Sharp) {
+  return sharp(await image.withMetadata().toBuffer());
 }

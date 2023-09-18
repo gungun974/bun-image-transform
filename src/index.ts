@@ -2,25 +2,9 @@ import { resolve, dirname, extname, relative, join } from "path";
 import { type BunPlugin, type OnLoadCallback } from "bun";
 import sharp from "sharp";
 import {
-  blurModifier,
-  extendModifier,
-  extractModifier,
-  flipModifier,
-  flopModifier,
-  formatModifier,
-  gammaModifier,
-  grayscaleModifier,
-  heightModifier,
-  medianModifier,
-  modulateModifier,
-  negateModifier,
-  normalizeModifier,
-  resizeModifier,
-  rotateModifier,
-  sharpenModifier,
-  thresholdModifier,
-  tintModifier,
-  widthModifier,
+  getModifierFormatOutput,
+  modifiersExecutor,
+  modifiersPlanner,
 } from "./modifier";
 import { access, mkdir } from "fs/promises";
 
@@ -62,18 +46,22 @@ export function BunImageTransformPlugin(settings?: Settings): BunPlugin {
       }
 
       async function generateImage(path: string) {
-        const link = new URL(
-          `file://${path.replace(/,/g, ".").replace(/#/g, "%23")}`,
-        );
+        const [left, right] = path.split("?");
 
-        const parameters = Object.fromEntries(link.searchParams);
+        if (!left || !right) {
+          throw Error("Invalid path");
+        }
 
-        const sourceFile = link.pathname;
+        const parameters = right;
+
+        const sourceFile = left;
 
         let extension = extname(sourceFile).slice(1);
 
-        if (parameters.format) {
-          extension = parameters.format;
+        const foundExtension = getModifierFormatOutput(parameters);
+
+        if (foundExtension) {
+          extension = foundExtension;
         }
 
         const fileMetadata = Bun.file(sourceFile);
@@ -93,27 +81,9 @@ export function BunImageTransformPlugin(settings?: Settings): BunPlugin {
         } catch {
           let image = sharp(sourceFile);
 
-          const meta = await image.metadata();
+          const modifiers = modifiersPlanner(parameters);
 
-          image = widthModifier(image, parameters);
-          image = heightModifier(image, parameters);
-          image = resizeModifier(image, meta, parameters);
-          image = extendModifier(image, parameters);
-          image = extractModifier(image, parameters);
-          image = rotateModifier(image, parameters);
-          image = modulateModifier(image, parameters);
-          image = flipModifier(image, parameters);
-          image = flopModifier(image, parameters);
-          image = sharpenModifier(image, parameters);
-          image = medianModifier(image, parameters);
-          image = blurModifier(image, parameters);
-          image = gammaModifier(image, parameters);
-          image = negateModifier(image, parameters);
-          image = normalizeModifier(image, parameters);
-          image = thresholdModifier(image, parameters);
-          image = tintModifier(image, parameters);
-          image = grayscaleModifier(image, parameters);
-          image = formatModifier(image, parameters);
+          image = await modifiersExecutor(image, modifiers);
 
           await mkdir(dirname(generatedImage), {
             recursive: true,

@@ -126,7 +126,7 @@ describe("format", () => {
 
   it("should format bun logo in jpeg with quality of 65", async () => {
     const { default: image }: any = await import(
-      "./bun-logo.png?format=jpeg&quality=65&bunimg"
+      "./bun-logo.png?quality=65&format=jpeg&bunimg"
     );
     const targetFile = Bun.file(resolve(import.meta.dir, "./bun-logo-65.jpeg"));
 
