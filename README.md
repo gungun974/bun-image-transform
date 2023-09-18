@@ -16,7 +16,24 @@ Bun Image Transform allows you to do exactly this.
 
 ## How to installed it
 
-For now, Bun Image Transform is not yet available on NPM, but later on, you'll simply need to run a bun install of the package.
+You will first need to install the package with Bun.
+
+```bash
+bun install bun-image-transform
+```
+
+Next, in your `tsconfig.json` file, you will need to add the library's typings to avoid "module not found" errors.
+
+```json
+  {
+    "compilerOptions": {
+      "types": [
+        // other packages, e.g. "bun-types",
++       "bun-image-transform"
+      ]
+    }
+  }
+```
 
 ## Usages
 
