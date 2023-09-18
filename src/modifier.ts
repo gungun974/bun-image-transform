@@ -30,6 +30,10 @@ export type Parameters = {
   extend?: string;
   extract?: string;
   rotate?: string;
+  brightness?: string;
+  saturation?: string;
+  hue?: string;
+  lightness?: string;
 };
 
 export class ModifierError extends Error {}
@@ -275,6 +279,42 @@ export function grayscaleModifier(image: Sharp, params: Parameters) {
   }
 
   return image.grayscale();
+}
+
+//! Modulate https://sharp.pixelplumbing.com/api-operation#grayscale
+
+export function modulateModifier(image: Sharp, params: Parameters) {
+  if (
+    !params.brightness &&
+    !params.saturation &&
+    !params.hue &&
+    !params.lightness
+  ) {
+    return image;
+  }
+
+  return image.modulate({
+    ...(params.brightness
+      ? {
+          brightness: convertToNumber(params.brightness),
+        }
+      : {}),
+    ...(params.saturation
+      ? {
+          saturation: convertToNumber(params.saturation),
+        }
+      : {}),
+    ...(params.hue
+      ? {
+          hue: convertToNumber(params.hue),
+        }
+      : {}),
+    ...(params.lightness
+      ? {
+          lightness: convertToNumber(params.lightness),
+        }
+      : {}),
+  });
 }
 
 //! Format https://sharp.pixelplumbing.com/api-output#toformat

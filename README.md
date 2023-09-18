@@ -134,32 +134,36 @@ Note : Even though it's possible to transform an image with an `await import`, d
 
 Bun Image Transform works by using the Node image processing library, sharp. Therefore, the available modifiers are directly taken from the sharp documentation.
 
-| Property  | Docs                                                            | Example                                                              | Comments                                                                                                                                                            |
-| --------- | :-------------------------------------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| width     | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?width=128&bunimg`                                    |
-| height    | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?height=128&bunimg`                                   |
-| resize    | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&bunimg`                       | The background color of the resize is optional                                                                                                                      |
-| kernel    | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&kernel=nearest&bunimg`        | Supported kernel: `nearest`, `cubic`, `mitchell`, `lanczos2` and `lanczos3` (default).                                                                              |
-| fit       | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&fit=fit_outside&bunimg`       | Sets `fit` option for `resize`.                                                                                                                                     |
-| position  | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&position=top&bunimg`          | Sets `position` option for `resize`.                                                                                                                                |
-| trim      | [Docs](https://sharp.pixelplumbing.com/api-resize#trim)         | `./bun-logo.png?trim=true&bunimg`                                    |
-| extend    | [Docs](https://sharp.pixelplumbing.com/api-resize#extend)       | `./bun-logo.png?extend={top}_{right}_{bottom}_{left}_[color]&bunimg` | Extend / pad / extrude one or more edges of the image with either the provided background colour or pixels derived from the image. The background color is optional |
-| extract   | [Docs](https://sharp.pixelplumbing.com/api-resize#extract)      | `./bun-logo.png?extract={left}_{top}_{width}_{height}&bunimg`        | Extract/crop a region of the image.                                                                                                                                 |
-| format    | [Docs](https://sharp.pixelplumbing.com/api-output#toformat)     | `./bun-logo.png?format=png&bunimg`                                   | Supported format: `png`, `jpg`, `jpeg`, `webp`, `avif`, `gif`, `heif` and `tiff`                                                                                    |
-| quality   | \_                                                              | `./bun-logo.png?format=webp&quality=80&bunimg`                       | Accepted values: 0 to 100 and need the format property to be apply                                                                                                  |
-| rotate    | [Docs](https://sharp.pixelplumbing.com/api-operation#rotate)    | `./bun-logo.png?rotate=45&bunimg`                                    |
-| enlarge   | \_                                                              | `./bun-logo.png?resize=1024x1024&enlarge=true&bunimg`                | Allow the image to be upscaled. By default the returned image will never be larger than the source in any dimension, while preserving the requested aspect ratio.   |
-| flip      | [Docs](https://sharp.pixelplumbing.com/api-operation#flip)      | `./bun-logo.png?flip=true&bunimg`                                    |
-| flop      | [Docs](https://sharp.pixelplumbing.com/api-operation#flop)      | `./bun-logo.png?flop=true&bunimg`                                    |
-| sharpen   | [Docs](https://sharp.pixelplumbing.com/api-operation#sharpen)   | `./bun-logo.png?sharpen=30&bunimg`                                   |
-| median    | [Docs](https://sharp.pixelplumbing.com/api-operation#median)    | `./bun-logo.png?median=10&bunimg`                                    |
-| blur      | [Docs](https://sharp.pixelplumbing.com/api-operation#blur)      | `./bun-logo.png?blur=5&bunimg`                                       |
-| gamma     | [Docs](https://sharp.pixelplumbing.com/api-operation#gamma)     | `./bun-logo.png?gamma=3&bunimg`                                      |
-| negate    | [Docs](https://sharp.pixelplumbing.com/api-operation#negate)    | `./bun-logo.png?negate=true&bunimg`                                  |
-| normalize | [Docs](https://sharp.pixelplumbing.com/api-operation#normalize) | `./bun-logo.png?normalize=true&bunimg`                               |
-| threshold | [Docs](https://sharp.pixelplumbing.com/api-operation#threshold) | `./bun-logo.png?threshold=10&bunimg`                                 |
-| tint      | [Docs](https://sharp.pixelplumbing.com/api-colour#tint)         | `./bun-logo.png?tint=#00ff00&bunimg`                                 |
-| grayscale | [Docs](https://sharp.pixelplumbing.com/api-colour#grayscale)    | `./bun-logo.png?grayscale=true&bunimg`                               |
+| Property   | Docs                                                            | Example                                                              | Comments                                                                                                                                                            |
+| ---------- | :-------------------------------------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| width      | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?width=128&bunimg`                                    |
+| height     | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?height=128&bunimg`                                   |
+| resize     | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&bunimg`                       | The background color of the resize is optional                                                                                                                      |
+| kernel     | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&kernel=nearest&bunimg`        | Supported kernel: `nearest`, `cubic`, `mitchell`, `lanczos2` and `lanczos3` (default).                                                                              |
+| fit        | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&fit=fit_outside&bunimg`       | Sets `fit` option for `resize`.                                                                                                                                     |
+| position   | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?resize=128x128_#ffffff&position=top&bunimg`          | Sets `position` option for `resize`.                                                                                                                                |
+| trim       | [Docs](https://sharp.pixelplumbing.com/api-resize#trim)         | `./bun-logo.png?trim=true&bunimg`                                    |
+| extend     | [Docs](https://sharp.pixelplumbing.com/api-resize#extend)       | `./bun-logo.png?extend={top}_{right}_{bottom}_{left}_[color]&bunimg` | Extend / pad / extrude one or more edges of the image with either the provided background colour or pixels derived from the image. The background color is optional |
+| extract    | [Docs](https://sharp.pixelplumbing.com/api-resize#extract)      | `./bun-logo.png?extract={left}_{top}_{width}_{height}&bunimg`        | Extract/crop a region of the image.                                                                                                                                 |
+| format     | [Docs](https://sharp.pixelplumbing.com/api-output#toformat)     | `./bun-logo.png?format=png&bunimg`                                   | Supported format: `png`, `jpg`, `jpeg`, `webp`, `avif`, `gif`, `heif` and `tiff`                                                                                    |
+| quality    | \_                                                              | `./bun-logo.png?format=webp&quality=80&bunimg`                       | Accepted values: 0 to 100 and need the format property to be apply                                                                                                  |
+| rotate     | [Docs](https://sharp.pixelplumbing.com/api-operation#rotate)    | `./bun-logo.png?rotate=45&bunimg`                                    |
+| enlarge    | \_                                                              | `./bun-logo.png?resize=1024x1024&enlarge=true&bunimg`                | Allow the image to be upscaled. By default the returned image will never be larger than the source in any dimension, while preserving the requested aspect ratio.   |
+| flip       | [Docs](https://sharp.pixelplumbing.com/api-operation#flip)      | `./bun-logo.png?flip=true&bunimg`                                    |
+| flop       | [Docs](https://sharp.pixelplumbing.com/api-operation#flop)      | `./bun-logo.png?flop=true&bunimg`                                    |
+| sharpen    | [Docs](https://sharp.pixelplumbing.com/api-operation#sharpen)   | `./bun-logo.png?sharpen=30&bunimg`                                   |
+| median     | [Docs](https://sharp.pixelplumbing.com/api-operation#median)    | `./bun-logo.png?median=10&bunimg`                                    |
+| blur       | [Docs](https://sharp.pixelplumbing.com/api-operation#blur)      | `./bun-logo.png?blur=5&bunimg`                                       |
+| gamma      | [Docs](https://sharp.pixelplumbing.com/api-operation#gamma)     | `./bun-logo.png?gamma=3&bunimg`                                      |
+| negate     | [Docs](https://sharp.pixelplumbing.com/api-operation#negate)    | `./bun-logo.png?negate=true&bunimg`                                  |
+| normalize  | [Docs](https://sharp.pixelplumbing.com/api-operation#normalize) | `./bun-logo.png?normalize=true&bunimg`                               |
+| threshold  | [Docs](https://sharp.pixelplumbing.com/api-operation#threshold) | `./bun-logo.png?threshold=10&bunimg`                                 |
+| tint       | [Docs](https://sharp.pixelplumbing.com/api-colour#tint)         | `./bun-logo.png?tint=#00ff00&bunimg`                                 |
+| grayscale  | [Docs](https://sharp.pixelplumbing.com/api-colour#grayscale)    | `./bun-logo.png?grayscale=true&bunimg`                               |
+| brightness | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?brightness=2&bunimg`                                 |
+| hue        | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?hue=180&bunimg`                                      |
+| lightness  | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?lightness=50&bunimg`                                 |
+| saturation | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?saturation=0.5&bunimg`                               |
 
 ## Credits
 

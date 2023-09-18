@@ -12,6 +12,7 @@ import {
   grayscaleModifier,
   heightModifier,
   medianModifier,
+  modulateModifier,
   negateModifier,
   normalizeModifier,
   resizeModifier,
@@ -72,6 +73,7 @@ export function BunImageTransformPlugin(settings?: {
           image = extendModifier(image, parameters);
           image = extractModifier(image, parameters);
           image = rotateModifier(image, parameters);
+          image = modulateModifier(image, parameters);
           image = flipModifier(image, parameters);
           image = flopModifier(image, parameters);
           image = sharpenModifier(image, parameters);
