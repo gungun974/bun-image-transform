@@ -1,6 +1,10 @@
 {
   "name": "bun-image-transform",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "description": " A bun plugin to import and transform image on the go",
   "author": {
     "name": "gungun974",
@@ -47,6 +51,7 @@
     "release": "bun test && bun run build && npm publish --access public"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.2",
     "@types/node": "^20.6.2",
     "bun-types": "latest",
     "typescript": "^5.2.2"
