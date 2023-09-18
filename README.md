@@ -84,7 +84,7 @@ To use as a runtime plugin, create a file that registers the plugin:
 // preload.ts
 import BunImageTransformPlugin from "bun-image-transform";
 
-Bun.plugin(BunImageTransformPlugin({}));
+Bun.plugin(BunImageTransformPlugin());
 ```
 
 Then preload it in your `bunfig.toml`:
@@ -104,7 +104,7 @@ Bun.build({
   entrypoints: ["./index.tsx"],
   // other config
 
-  plugins: [BunImageTransformPlugin({})],
+  plugins: [BunImageTransformPlugin()],
 });
 ```
 

@@ -23,7 +23,7 @@ import {
 } from "./modifier";
 import { access, mkdir } from "fs/promises";
 
-export function BunImageTransformPlugin(settings: {
+export function BunImageTransformPlugin(settings?: {
   cacheDirectory?: string | (() => string);
 }): BunPlugin {
   return {
@@ -31,7 +31,7 @@ export function BunImageTransformPlugin(settings: {
     async setup(build) {
       let cacheDirectory = ".cache";
 
-      if (settings.cacheDirectory) {
+      if (settings && settings.cacheDirectory) {
         if (typeof settings.cacheDirectory === "string") {
           cacheDirectory = settings.cacheDirectory;
         } else {

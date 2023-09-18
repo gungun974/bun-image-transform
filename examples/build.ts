@@ -4,7 +4,7 @@ Bun.build({
   entrypoints: ["./index.ts"],
   // other config
 
-  plugins: [BunImageTransformPlugin({})],
+  plugins: [BunImageTransformPlugin()],
   outdir: "./dist",
   target: "bun",
 });
