@@ -76,10 +76,15 @@ export function BunImageTransformPlugin(settings?: Settings): BunPlugin {
           extension = parameters.format;
         }
 
-        const generatedImage = resolve(
-          outputDirectory,
-          `${Bun.hash(path)}.${extension}`,
-        );
+        const fileMetadata = Bun.file(sourceFile);
+
+        const hasher = new Bun.CryptoHasher("md5");
+        hasher.update(path);
+        hasher.update(`size=${fileMetadata.size}`);
+        hasher.update(`lastModified=${fileMetadata.lastModified}`);
+        const hash = hasher.digest("hex");
+
+        const generatedImage = resolve(outputDirectory, `${hash}.${extension}`);
 
         try {
           await access(generatedImage);
