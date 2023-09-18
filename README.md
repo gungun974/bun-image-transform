@@ -59,7 +59,7 @@ To use it in your code once the plugin is activated, you will simply need to loa
 _The syntax for using the modifiers is similar to what you can find in the parameters of an HTTP GET method._
 
 ```ts
-import bunLogo from './bun-logo.png?format=jpeg&bunimg'
+import bunLogo from "./bun-logo.png?format=jpeg&bunimg";
 
 console.log(bunLogo);
 ```
@@ -67,10 +67,9 @@ console.log(bunLogo);
 You can also use if you want `require` and `await import()`
 
 ```ts
-require('./bun-logo.png?format=webp&bunimg');
+require("./bun-logo.png?format=webp&bunimg");
 
-
-await import('./bun-logo.png?format=jpg&quality=75&bunimg');
+await import("./bun-logo.png?format=jpg&quality=75&bunimg");
 ```
 
 Note : Even though it's possible to transform an image with an `await import`, don't forget that the API remains limited in complex modifications, and you can simply perform the dynamic image transformations yourself using `sharp` directly.
@@ -79,7 +78,7 @@ Note : Even though it's possible to transform an image with an `await import`, d
 
 Bun Image Transform works by using the Node image processing library, sharp. Therefore, the available modifiers are directly taken from the sharp documentation.
 
-| Property  | Docs                                                          | Example                                                           | Comments                                                                                                                                                      |
+| Property  | Docs                                                            | Example                                                              | Comments                                                                                                                                                            |
 | --------- | :-------------------------------------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | width     | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?width=128&bunimg`                                    |
 | height    | [Docs](https://sharp.pixelplumbing.com/api-resize#resize)       | `./bun-logo.png?height=128&bunimg`                                   |
@@ -107,6 +106,7 @@ Bun Image Transform works by using the Node image processing library, sharp. The
 | grayscale | [Docs](https://sharp.pixelplumbing.com/api-colour#grayscale)    | `./bun-logo.png?grayscale=true&bunimg`                               |
 
 ## Credits
+
 This project would not be possible without [Bun](https://github.com/oven-sh/bun) inspiring me to create this plugin.
 
 To the project also [Sharp](https://github.com/lovell/sharp) for making it easy to transform and convert images.
