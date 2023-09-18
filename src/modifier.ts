@@ -66,6 +66,11 @@ export function resizeModifier(
   }
 
   let [size, background] = params.resize.split("_");
+
+  if (!size) {
+    throw new ModifierError("Size in resize Modifier is missing");
+  }
+
   let [width, height] = size.split("x").map(Number);
   if (!width) {
     return image;
@@ -128,6 +133,19 @@ export function extractModifier(image: Sharp, params: Parameters) {
   }
 
   let [left, top, width, height] = params.extract.split("_").map(Number);
+
+  if (!left) {
+    throw new ModifierError("Left in extract Modifier is missing");
+  }
+  if (!top) {
+    throw new ModifierError("Top in extract Modifier is missing");
+  }
+  if (!width) {
+    throw new ModifierError("Width in extract Modifier is missing");
+  }
+  if (!height) {
+    throw new ModifierError("Height in extract Modifier is missing");
+  }
 
   return image.extract({
     left,
