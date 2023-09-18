@@ -23,7 +23,7 @@ import {
 } from "./modifier";
 import { access, mkdir } from "fs/promises";
 
-function BunImageTransformPlugin(settings: {
+export function BunImageTransformPlugin(settings: {
   cacheDirectory?: string | (() => string);
 }): BunPlugin {
   return {

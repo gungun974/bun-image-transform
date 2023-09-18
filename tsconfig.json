@@ -15,10 +15,11 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
+    "noUncheckedIndexedAccess": true,
     "types": [
       "bun-types" // add Bun global
-    ],
-    "include": ["**/*.ts", "**/*.d.ts"],
-    "exclude": ["node_modules"]
-  }
+    ]
+  },
+  "include": ["src/**/*.ts", "customTypes.d.ts"],
+  "exclude": ["node_modules"]
 }
