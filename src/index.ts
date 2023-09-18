@@ -41,7 +41,9 @@ export function BunImageTransformPlugin(settings?: {
       }
 
       async function generateImage(path: string) {
-        const link = new URL(`file://${path}`);
+        const link = new URL(
+          `file://${path.replace(/,/g, ".").replace(/#/g, "%23")}`,
+        );
 
         const parameters = Object.fromEntries(link.searchParams);
 

@@ -8,7 +8,7 @@ export function convertToNumber(text: string | undefined) {
     return;
   }
 
-  const number = parseInt(text, 10);
+  const number = parseFloat(text);
 
   if (isNaN(number)) {
     throw new Error(`Fail to convert ${text} to a number`);

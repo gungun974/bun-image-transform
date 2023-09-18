@@ -128,6 +128,8 @@ require("./bun-logo.png?format=webp&bunimg");
 await import("./bun-logo.png?format=jpg&quality=75&bunimg");
 ```
 
+**Important** : You can't use dot to write number like `0.5` **you must use commas** like `0,5` or the file will not be resolve correctly
+
 Note : Even though it's possible to transform an image with an `await import`, don't forget that the API remains limited in complex modifications, and you can simply perform the dynamic image transformations yourself using `sharp` directly.
 
 ### Modifiers
@@ -163,7 +165,7 @@ Bun Image Transform works by using the Node image processing library, sharp. The
 | brightness | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?brightness=2&bunimg`                                 |
 | hue        | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?hue=180&bunimg`                                      |
 | lightness  | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?lightness=50&bunimg`                                 |
-| saturation | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?saturation=0.5&bunimg`                               |
+| saturation | [Docs](https://sharp.pixelplumbing.com/api-operation#modulate)  | `./bun-logo.png?saturation=0,5&bunimg`                               |
 
 ## Credits
 
