@@ -97,7 +97,7 @@ export function BunImageTransformPlugin(settings?: {
 
       if (build.config) {
         build.onResolve({ filter: /&bunimg$/ }, async (args) => {
-          const path = resolve(dirname(args.importer), args.path);
+          const path = Bun.resolveSync(args.path, process.cwd());
 
           const generatedImage = await generateImage(path);
 
