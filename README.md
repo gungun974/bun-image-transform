@@ -35,6 +35,12 @@ Next, in your `tsconfig.json` file, you will need to add the library's typings t
   }
 ```
 
+## ESBuild
+
+Since version v1.1.0.
+This Plugin has compatibility with ESBuild if you prefer ESBuild.
+If you used the default import you would automatically use the correct Plugin however you can use `ESBuildImageTransformPlugin` if you prefer named import.
+
 ### Troubleshooting
 
 In the latest version of bun, Bun have some issue with running `postinstall` script.

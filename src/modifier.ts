@@ -3,7 +3,7 @@ import {
   clampDimensionsPreservingAspectRatio,
   convertToBoolean,
   convertToNumber,
-} from "./utils";
+} from "./utils.js";
 
 export type ModifierParameters =
   | WidthModifierParameters
@@ -33,7 +33,7 @@ export class ModifierError extends Error {}
 //! Controls
 
 export function getModifierFormatOutput(
-  rawParameters: string,
+  rawParameters: string
 ): string | undefined {
   const rawModifiers = rawParameters.replace(/,/g, ".").split("&");
 
@@ -387,7 +387,7 @@ export function modifiersPlanner(rawParameters: string): ModifierParameters[] {
 
 export async function modifiersExecutor(
   sourceImage: Sharp,
-  modifiers: ModifierParameters[],
+  modifiers: ModifierParameters[]
 ) {
   let image = sourceImage;
 
@@ -529,7 +529,7 @@ export type ResizeModifierParameters = {
 function resizeModifier(
   image: Sharp,
   meta: Metadata,
-  params: ResizeModifierParameters,
+  params: ResizeModifierParameters
 ) {
   let width = params.width;
   let height = params.height;

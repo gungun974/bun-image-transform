@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun run ./index.ts",
-    "build": "bun run ./build.ts"
+    "build": "bun run ./build.ts",
+    "esbuild": "node ./esbuild.config.js"
   },
   "devDependencies": {
     "bun-types": "latest"

@@ -29,7 +29,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "bun": "./dist/index.js",
-      "node": "./dist/cjs/index.js",
+      "node": "./dist/index.js",
       "require": "./dist/cjs/index.js",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
@@ -60,6 +60,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "esbuild": "^0.19.4",
     "sharp": "^0.32.5"
   }
 }

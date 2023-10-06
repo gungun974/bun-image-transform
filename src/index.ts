@@ -1,1 +1,6 @@
-export { default, BunImageTransformPlugin } from "./plugin";
+export {
+  default,
+  BunImageTransformPlugin,
+  ESBuildImageTransformPlugin,
+  UniversalBunImageTransformPlugin,
+} from "./plugin/index.js";

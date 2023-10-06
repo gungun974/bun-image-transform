@@ -4,8 +4,9 @@ import {
   getModifierFormatOutput,
   modifiersExecutor,
   modifiersPlanner,
-} from "./modifier";
-import { access, mkdir } from "fs/promises";
+} from "./modifier.js";
+import { access, mkdir, stat } from "fs/promises";
+import { createHash } from "crypto";
 
 export async function applyImageTransformation(
   path: string,
@@ -29,12 +30,13 @@ export async function applyImageTransformation(
     extension = foundExtension;
   }
 
-  const fileMetadata = Bun.file(sourceFile);
+  const fileMetadata = await stat(sourceFile);
 
-  const hasher = new Bun.CryptoHasher("md5");
+  const hasher = createHash("md5");
+
   hasher.update(path);
   hasher.update(`size=${fileMetadata.size}`);
-  hasher.update(`lastModified=${fileMetadata.lastModified}`);
+  hasher.update(`lastModified=${fileMetadata.mtime}`);
   const hash = hasher.digest("hex");
 
   const generatedImage = resolve(outputDirectory, `${hash}.${extension}`);
