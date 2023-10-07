@@ -32,10 +32,14 @@ export class ModifierError extends Error {}
 
 //! Controls
 
+const MODIFIER_SEPARATOR = /&amp;|&/g;
+
 export function getModifierFormatOutput(
   rawParameters: string
 ): string | undefined {
-  const rawModifiers = rawParameters.replace(/,/g, ".").split("&");
+  const rawModifiers = rawParameters
+    .replace(/,/g, ".")
+    .split(MODIFIER_SEPARATOR);
 
   for (let index = rawModifiers.length - 1; index >= 0; index--) {
     const rawModifier = rawModifiers[index];
@@ -59,7 +63,9 @@ export function getModifierFormatOutput(
 }
 
 export function modifiersPlanner(rawParameters: string): ModifierParameters[] {
-  const rawModifiers = rawParameters.replace(/,/g, ".").split("&");
+  const rawModifiers = rawParameters
+    .replace(/,/g, ".")
+    .split(MODIFIER_SEPARATOR);
 
   const modifiers: ModifierParameters[] = [];
 

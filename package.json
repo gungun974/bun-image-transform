@@ -46,9 +46,14 @@
   ],
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist && tsc --project tsconfig.esm.json && echo 'import \"../customTypes.d.ts\";' >> ./dist/index.d.ts && tsc --project tsconfig.cjs.json && echo 'import \"../customTypes.d.ts\";' >> ./dist/cjs/index.d.ts",
+    "build": "rm -rf dist && tsc --project tsconfig.esm.json && echo 'import \"../customTypes.d.ts\";' >> ./dist/index.d.ts && tsc --project tsconfig.cjs.json && echo 'import \"../customTypes.d.ts\";' >> ./dist/cjs/index.d.ts && bun run ./build.ts",
+    "postbuild": "chmod +x ./dist/cli.js",
     "lint": "tsc",
-    "release": "bun test && bun run build && npm publish --access public"
+    "release": "bun test && bun run build && npm publish --access public",
+    "cli": "bun run ./src/cli.ts"
+  },
+  "bin": {
+    "bun-image-transform": "./dist/cli.js"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
@@ -60,6 +65,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "commander": "^11.0.0",
     "esbuild": "^0.19.4",
     "sharp": "^0.32.5"
   }

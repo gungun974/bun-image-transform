@@ -4,7 +4,7 @@ import { tmpdir } from "os";
 import { extname, resolve } from "path";
 import { describe, expect, it } from "bun:test";
 import sharp from "sharp";
-import { ModifierError } from "../src/modifier";
+import { ModifierError } from "../src/core/modifier";
 
 function generateUUID(): string {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {

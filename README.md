@@ -216,6 +216,11 @@ To the project also [Sharp](https://github.com/lovell/sharp) for making it easy 
 
 And to the high-performance, secure, and easy-to-use image optimizer server, [IPX](https://github.com/unjs/ipx), which greatly inspired the syntax of the modifiers and usage.
 
+## Experimental
+
+This project has a command line to transform `bunimg://` urls like the plugin does directly but in a file.
+This Command Line is not yet documented because it remains experimental.
+
 ## License
 
 [MIT](./LICENSE)

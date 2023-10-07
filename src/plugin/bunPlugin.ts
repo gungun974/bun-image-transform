@@ -1,6 +1,6 @@
 import { relative, join } from "path";
 import { type BunPlugin, type OnLoadCallback } from "bun";
-import { applyImageTransformation } from "../core.js";
+import { applyImageTransformation } from "../core/core.js";
 import { Settings } from "./PluginSettings.js";
 
 /**

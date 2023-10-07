@@ -1,6 +1,6 @@
 import { relative, join, resolve } from "path";
 import { OnLoadArgs, OnLoadResult, type Plugin } from "esbuild";
-import { applyImageTransformation } from "../core.js";
+import { applyImageTransformation } from "../core/core.js";
 import { Settings } from "./PluginSettings.js";
 
 type OnLoadCallback = (

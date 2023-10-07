@@ -3,7 +3,7 @@ import {
   ModifierParameters,
   getModifierFormatOutput,
   modifiersPlanner,
-} from "../src/modifier";
+} from "../src/core/modifier";
 
 describe("getModifierFormatOutput", () => {
   it("should return the last file format set", () => {
@@ -41,6 +41,36 @@ describe("modifiersPlanner", () => {
 
     // act
     const result = modifiersPlanner(`${rawModifiers.join("&")}&bunimg`);
+
+    // assert
+    expect(result).toStrictEqual([
+      {
+        type: "width",
+        width: 128,
+        enlarge: false,
+      },
+      {
+        type: "width",
+        width: 64,
+        enlarge: true,
+      },
+      {
+        type: "width",
+        width: 8,
+        enlarge: false,
+      },
+    ] satisfies ModifierParameters[]);
+  });
+
+  it("should support `&` and `&amp;` modifier separator", () => {
+    // arrange
+
+    const rawModifiers = ["width=128", "enlarge=true&width=64", "width=8"];
+
+    // act
+    const result = modifiersPlanner(
+      "width=128&enlarge=true&amp;width=64&width=8&amp;bunimg"
+    );
 
     // assert
     expect(result).toStrictEqual([
