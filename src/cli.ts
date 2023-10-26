@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import fs, { readFile, stat, writeFile } from "fs/promises";
+import fs, { access, mkdir, readFile, stat, writeFile } from "fs/promises";
 import { program } from "commander";
 import path, { dirname, join, relative, resolve } from "path";
 import { applyImageTransformation } from "./core/core";
@@ -22,11 +22,13 @@ let relativeMode:
 
 let imageResourceFolder = "./";
 
-let outputDirectory = ".cache";
+let outputDirectory = "output";
 let useRelativePath = false;
 let prefixRelativePath = "img/";
 
 let dryRun = false;
+
+let cacheDirectory = ".cache";
 
 async function listFilesByPattern(
   directory: string,
@@ -156,7 +158,23 @@ async function generateImages(files: FileToTransform[]) {
         process.exit(1);
       }
 
-      url.output = await applyImageTransformation(url.path, outputDirectory);
+      const cachedImage = await applyImageTransformation(
+        url.path,
+        cacheDirectory
+      );
+
+      url.output = resolve(outputDirectory, path.basename(cachedImage));
+
+      try {
+        await access(url.output);
+      } catch {
+        await mkdir(dirname(url.output), {
+          recursive: true,
+        });
+
+        await fs.copyFile(cachedImage, url.output);
+      }
+
       console.log(
         `${colors.yellow}Transform ${colors.blue}${url.path}${colors.yellow} to ${colors.blue}${url.output}${colors.clear}`
       );
@@ -234,8 +252,9 @@ async function main() {
     .option(
       "-o, --output <directory>",
       "Default directory when file are output",
-      ".cache"
+      "output"
     )
+    .option("-c, --cache <directory>", "Default cache directory", ".cache")
     .option(
       "--use-output-relative-path",
       "Don't use absolute path in output file",
@@ -259,6 +278,7 @@ async function main() {
   filePattern = new RegExp(options.pattern);
 
   outputDirectory = options.output;
+  cacheDirectory = options.cache;
   useRelativePath = options.useOutputRelativePath;
   prefixRelativePath = options.outputPrefixRelativePath;
 
