@@ -1,5 +1,11 @@
 # bun-image-transform
 
+## 1.1.1
+
+### Patch Changes
+
+- 79ad8ba: Add .cache directory for CLI transformer
+
 ## 1.1.0
 
 ### Minor Changes
