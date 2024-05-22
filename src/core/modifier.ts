@@ -818,6 +818,7 @@ function formatModifier(image: Sharp, parameters: FormatModifierParameters) {
     case "heif":
       image.heif({
         quality: parameters.quality,
+        compression: "av1",
       });
       return image;
     case "jxl":
