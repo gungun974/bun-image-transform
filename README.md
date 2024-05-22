@@ -41,45 +41,6 @@ Since version v1.1.0.
 This Plugin has compatibility with ESBuild if you prefer ESBuild.
 If you used the default import you would automatically use the correct Plugin however you can use `ESBuildImageTransformPlugin` if you prefer named import.
 
-### Troubleshooting
-
-In the latest version of bun, Bun have some issue with running `postinstall` script.
-This results in Sharp not downloading the necessary binary files for its proper functioning, and this error message.
-
-```
-$ bun run ./index.ts
-32 |     if (loadedModule) {
-33 |       const [, loadedPackage] = loadedModule.match(/node_modules[\\/]([^\\/]+)[\\/]/);
-34 |       help.push(`- Ensure the version of sharp aligns with the ${loadedPackage} package: "npm ls sharp"`);
-35 |     }
-36 |   }
-37 |   throw new Error(help.join('\n'));
-            ^
-error:
-Something went wrong installing the "sharp" module
-
-Cannot find module "../build/Release/sharp-linux-x64.node" from "/home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/sharp.js"
-
-Possible solutions:
-- Install with verbose logging and look for errors: "npm install --ignore-scripts=false --foreground-scripts --verbose sharp"
-- Install for the current linux-x64 runtime: "npm install --platform=linux --arch=x64 sharp"
-- Consult the installation documentation: https://sharp.pixelplumbing.com/install
-      at /home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/sharp.js:37:8
-      at globalThis (/home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/sharp.js:37:33)
-      at require (:1:20)
-      at /home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/constructor.js:11:0
-      at globalThis (/home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/constructor.js:439:17)
-      at require (:1:20)
-      at /home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/index.js:6:6
-      at globalThis (/home/gungun974/lab/perso/bun-image-transform/node_modules/sharp/lib/index.js:16:17)
-error: script "dev" exited with code 1 (SIGHUP)
-```
-
-For now, a solution I use is to go into the `node_modules/sharp` folder and run `bun install`, which here will correctly trigger the `postinstall`.
-In the future this.
-
-In the future, this workaround will no longer be necessary when Bun has fixed this.
-
 ## Usages
 
 ### Runtime usage
