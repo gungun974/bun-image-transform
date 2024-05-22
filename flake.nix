@@ -24,7 +24,7 @@
         inherit system;
       };
 
-      version = "1.1.2";
+      version = "1.1.3";
 
       node_modules = pkgs.mkYarnModules {
         pname = "bun-image-transform-node_modules";

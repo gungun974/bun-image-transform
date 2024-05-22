@@ -1,5 +1,11 @@
 # bun-image-transform
 
+## 1.1.3
+
+### Patch Changes
+
+- Fix nix node modules dependencies fetch with bun yarn.lock
+
 ## 1.1.2
 
 ### Patch Changes
