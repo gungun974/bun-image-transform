@@ -56,17 +56,17 @@
     "bun-image-transform": "./dist/cli.js"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.26.2",
-    "@types/node": "^20.6.2",
+    "@changesets/cli": "^2.27.3",
+    "@types/node": "^20.12.12",
     "bun-types": "latest",
-    "typescript": "^5.2.2"
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "commander": "^11.0.0",
-    "esbuild": "^0.19.4",
-    "sharp": "^0.32.5"
+    "commander": "^12.1.0",
+    "esbuild": "^0.21.3",
+    "sharp": "^0.33.4"
   }
 }
