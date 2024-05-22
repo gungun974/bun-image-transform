@@ -24,28 +24,13 @@
         inherit system;
       };
 
-      version = "1.1.1";
+      version = "1.1.2";
 
-      node_modules = pkgs.stdenv.mkDerivation {
+      node_modules = pkgs.mkYarnModules {
         pname = "bun-image-transform-node_modules";
-        src = gitignore.lib.gitignoreSource ./.;
         inherit version;
-        impureEnvVars =
-          pkgs.lib.fetchers.proxyImpureEnvVars
-          ++ ["GIT_PROXY_COMMAND" "SOCKS_SERVER"];
-        nativeBuildInputs = [pkgs.bun];
-        dontConfigure = true;
-        buildPhase = ''
-          bun install --no-progress --frozen-lockfile
-        '';
-        installPhase = ''
-          mkdir -p $out/node_modules
-
-          cp -R ./node_modules $out
-        '';
-        outputHash = "sha256-pYCXPu22HxHJwCbETD8fDSU0eyoZUJUDuZGNax/YLew=";
-        outputHashAlgo = "sha256";
-        outputHashMode = "recursive";
+        packageJSON = ./package.json;
+        yarnLock = ./yarn.lock;
       };
     in {
       packages = {

@@ -50,7 +50,8 @@
     "postbuild": "chmod +x ./dist/cli.js",
     "lint": "tsc",
     "release": "bun test && bun run build && npm publish --access public",
-    "cli": "bun run ./src/cli.ts"
+    "cli": "bun run ./src/cli.ts",
+    "update-nix-node-lock": "bun install --yarn"
   },
   "bin": {
     "bun-image-transform": "./dist/cli.js"
