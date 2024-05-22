@@ -1,5 +1,13 @@
 # bun-image-transform
 
+## 1.1.2
+
+### Patch Changes
+
+- Update all project dependencies to their latest version
+
+- Add CLI build process in the Nix flake
+
 ## 1.1.1
 
 ### Patch Changes
